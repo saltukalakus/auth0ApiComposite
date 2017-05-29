@@ -3,6 +3,7 @@ restt/CompositeResource$2.class
 auth0Okhttp/Pj.class
 modelClasses/Auth0Rules.class
 restt/ApplicationConfig.class
+com/auth0test/auth0test/Auth0Constants.class
 modelClasses/Auth0Trans.class
 auth0Okhttp/OkHTTPClass.class
 restt/CompositeResource$1.class

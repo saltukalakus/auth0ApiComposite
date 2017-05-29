@@ -14,13 +14,10 @@ import com.google.gson.Gson;
 import java.io.IOException;
 import java.net.UnknownHostException;
 import java.util.logging.Logger;
-import modelClasses.Auth0Trans;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
-import okhttp3.Headers;
 
 public class OkHTTPClass {
 
@@ -44,16 +41,12 @@ public class OkHTTPClass {
                 .addHeader("Authorization", jwtKey)
                 .build();
 
-        Auth0Trans reply = new Auth0Trans();
-
         Response response = null;
 
         try {
-           
          response = staticClient.newCall(request).execute();
 
             if (!response.isSuccessful()) {
-
                 log("error:" + response.body().string());
 
                 //  throw new IOException("Unexpected code " + response);
@@ -70,7 +63,6 @@ public class OkHTTPClass {
 
         }
 
-        //   log(response.body().string());
         return response.body().string();
     }
 

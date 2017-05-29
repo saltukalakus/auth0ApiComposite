@@ -105,12 +105,12 @@ public class CompositeResource {
                     //GET CLIENT LIST
                     clientList = loadClients(trans);
 
-                    //CHECK FOR RULES
+                    //CLIENT LOOP  /TODO * CONVERT TO FOR FOR EACH STREAMS..
                     for (Auth0Client client : clientList) {
 
                         log("checking client:" + client.name);
 
-                        //LOOP THROUGH RULES.. 
+                        //LOOP THROUGH RULES.. /TODO * CONVERT TO FOR FOR EACH STREAMS..
                         for (Auth0Rules rule : rulesList) {
 
                             String checkString = "context.clientName === '" + client.name + "'";
@@ -127,17 +127,18 @@ public class CompositeResource {
                     }
 
                     //ADD LIST TO REPLY
-                    //ADD LIST TO RETURN OBJECT
                     reply.clientList = clientList;
                 }
 
             }
 
+            //CATCH BAD HOST EXCEPTION
         } catch (UnknownHostException ex) {
             
             reply.setFail("Invalid Domain. Pls check your domain");
             logger.log(Level.SEVERE, "error:" + ex.getMessage(), ex);
             
+            //CATCH BAD JWT KEY EXCEPTION
         }  catch (IOException ex) {
             
             reply.setFail("Auth0 Returned 401 Unauthorized, please check your JWT Key. Pls note that your JWT expires after 24 hrs by default.");
@@ -216,9 +217,7 @@ public class CompositeResource {
     }
 
     void log(String msg) {
-
         logger.log(Level.INFO, "{0}{1}", new Object[]{TAG, msg});
-
     }
 
 }
