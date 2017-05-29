@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package okhttpTest;
+package auth0Okhttp;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParser;

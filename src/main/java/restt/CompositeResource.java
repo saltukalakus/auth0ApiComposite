@@ -7,6 +7,7 @@ package restt;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.sun.jmx.remote.internal.ClientListenerInfo;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -15,18 +16,15 @@ import java.util.logging.Level;
 import javax.transaction.SystemException;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.UriInfo;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
 import javax.ws.rs.GET;
+import javax.ws.rs.Produces;
 import javax.ws.rs.NotSupportedException;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PUT;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Request;
 import modelClasses.Auth0Client;
 import modelClasses.Auth0Rules;
-import okhttpTest.Pj;
+import modelClasses.Auth0Trans;
 
 /**
  * REST Web Service
@@ -39,6 +37,8 @@ public class CompositeResource {
     @Context
     private UriInfo context;
 
+    Gson gson = new Gson();
+
     String TAG = "CompositeResource:";
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(CompositeResource.class.getName());
 
@@ -48,33 +48,105 @@ public class CompositeResource {
     public CompositeResource() {
     }
 
-    @POST
+    @GET
     @Produces(MediaType.APPLICATION_JSON)
-    @Consumes(MediaType.APPLICATION_JSON)
     @Path("testAutho")
-    public String testAutho(@Context Request req, String json) throws IOException, NotSupportedException, SystemException, Exception {
+    public String testAutho(@Context HttpHeaders headers) throws IOException, NotSupportedException, SystemException, Exception {
         log("++++++++:testAutho");
-        log("sent Json:" + json);
 
-        //GET CLIENT LIST
+        //INIT REPLY CLASS
+        Auth0Trans reply = new Auth0Trans();
+
+        //INIT LIST OF CLIENTS
         List<Auth0Client> clientList = new ArrayList();
-        clientList = loadClients();
 
-        //GET RULES LIST
+        //INIT LIST OF RULES
         List<Auth0Rules> rulesList = new ArrayList();
-        rulesList = loadRules();
 
-        //return Pj.printJ(reply);
-        return "client list:" + clientList.size() + " rules list:" + rulesList;
+        try {
+
+            //CHECK FOR HEADERS
+            if (null == headers.getRequestHeader("Authorization")) {
+
+                reply.setFail("No jwtkey was sent, please send include a valid jwt key in the headers using: Authorization header");
+
+            } else if (null == headers.getRequestHeader("auth0domain")) {
+
+                reply.setFail("No domain was sent, pls send a valid Auth0 domain in headers using 'auth0domain' header e.g: hadrianhu.eu.auth0.com");
+
+            } else {
+
+                //GET JASON WEB TOKEN
+                String jwtKey = headers.getRequestHeader("Authorization").get(0);
+                log("jwtKey:" + jwtKey);
+
+                //GET DOMAIN
+                String domainUrl = headers.getRequestHeader("auth0domain").get(0);
+                log("domainUrl:" + domainUrl);
+
+                if (null == jwtKey) {
+                    reply.setFail("No jwtkey was sent");
+
+                } else if (null == domainUrl) {
+                    reply.setFail("No domainUrl was sent");
+
+                } else {
+
+                    //CREATE OBJECT TO TRANSFER VARS
+                    Auth0Trans trans = new Auth0Trans();
+                    trans.domainUrl = domainUrl;
+                    trans.jwtkey = jwtKey;
+                    log("got trans:" + trans.domainUrl);
+
+                    //GET RULES LIST
+                    rulesList = loadRules(trans);
+
+                    //GET CLIENT LIST
+                    clientList = loadClients(trans);
+
+                    //CHECK FOR RULES
+                    for (Auth0Client client : clientList) {
+
+                        log("checking client:" + client.name);
+
+                        //LOOP THROUGH RULES.. 
+                        for (Auth0Rules rule : rulesList) {
+
+                            String checkString = "context.clientName === '" + client.name + "'";
+
+                            if (rule.script != null && rule.script.contains(checkString)) {
+                                log("rule contains checkString:" + checkString);
+
+                                client.rule = rule;
+                                log("rule set to:" + client);
+                            } else {
+                                // log("rule does not contain not setting..");
+                            }
+                        }
+                    }
+
+                    //ADD LIST TO REPLY
+                    //ADD LIST TO RETURN OBJECT
+                    reply.clientList = clientList;
+                }
+
+            }
+
+        } catch (Exception ex) {
+            reply.setFail("SERVER__ERROR");
+            logger.log(Level.SEVERE, "error:" + ex.getMessage(), ex);
+        }
+        return reply.toString();
     }
 
-    public List<Auth0Client> loadClients() throws IOException {
+    public List<Auth0Client> loadClients(Auth0Trans trans) throws IOException {
 
         String reply = "it failed";
 
-        String url = "https://hadrianhu.eu.auth0.com/api/v2/clients?fields=signing_keys&include_fields=false";
+        //https://hadrianhu.eu.auth0.com/api/v2/rules
+        String url = "https://" + trans.domainUrl + "/api/v2/clients?fields=signing_keys&include_fields=false";
 
-        reply = okhttpTest.OkHTTPClass.staticGet(url);
+        reply = auth0Okhttp.OkHTTPClass.staticGet(url, trans.jwtkey);
         //RETURN REPLY
         //log(Pj.printJ(reply));
         Gson gson = new Gson();
@@ -94,12 +166,12 @@ public class CompositeResource {
         return clientList;
     }
 
-    public List<Auth0Rules> loadRules() throws IOException {
+    public List<Auth0Rules> loadRules(Auth0Trans trans) throws IOException {
 
         String reply = "it failed";
-        String url = "https://hadrianhu.eu.auth0.com/api/v2/rules";
+        String url = "https://" + trans.domainUrl + "/api/v2/rules";
 
-        reply = okhttpTest.OkHTTPClass.staticGet(url);
+        reply = auth0Okhttp.OkHTTPClass.staticGet(url, trans.jwtkey);
         //RETURN REPLY
         //log(Pj.printJ(reply));
 

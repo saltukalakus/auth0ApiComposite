@@ -1,3 +1,10 @@
-okhttpTest/OkHTTPClass.class
+modelClasses/Auth0Client.class
+restt/CompositeResource$2.class
+auth0Okhttp/Pj.class
+modelClasses/Auth0Rules.class
 restt/ApplicationConfig.class
+modelClasses/Auth0Trans.class
+auth0Okhttp/OkHTTPClass.class
+restt/CompositeResource$1.class
 restt/CompositeResource.class
+modelClasses/Auth0Client$Jwt_configuration.class
