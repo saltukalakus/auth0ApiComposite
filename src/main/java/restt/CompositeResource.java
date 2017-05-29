@@ -10,6 +10,7 @@ import com.google.gson.reflect.TypeToken;
 import com.sun.jmx.remote.internal.ClientListenerInfo;
 import java.io.IOException;
 import java.lang.reflect.Type;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -132,6 +133,16 @@ public class CompositeResource {
 
             }
 
+        } catch (UnknownHostException ex) {
+            
+            reply.setFail("Invalid Domain. Pls check your domain");
+            logger.log(Level.SEVERE, "error:" + ex.getMessage(), ex);
+            
+        }  catch (IOException ex) {
+            
+            reply.setFail("Auth0 Returned 401 Unauthorized, please check your JWT Key. Pls note that your JWT expires after 24 hrs by default.");
+            logger.log(Level.SEVERE, "error:" + ex.getMessage(), ex);
+            
         } catch (Exception ex) {
             reply.setFail("SERVER__ERROR");
             logger.log(Level.SEVERE, "error:" + ex.getMessage(), ex);
@@ -139,6 +150,12 @@ public class CompositeResource {
         return reply.toString();
     }
 
+    /**
+     * GET LIST OF THE APPLICATION / CLIENT USER HAS..
+     * @param trans
+     * @return
+     * @throws IOException 
+     */
     public List<Auth0Client> loadClients(Auth0Trans trans) throws IOException {
 
         String reply = "it failed";
@@ -166,6 +183,12 @@ public class CompositeResource {
         return clientList;
     }
 
+    /**
+     * LOAD LIST OF RULES CLIENT HAS
+     * @param trans
+     * @return
+     * @throws IOException 
+     */
     public List<Auth0Rules> loadRules(Auth0Trans trans) throws IOException {
 
         String reply = "it failed";

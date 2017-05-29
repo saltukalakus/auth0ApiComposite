@@ -9,9 +9,12 @@ package auth0Okhttp;
  *
  * @author Ivan
  */
+import com.auth0test.auth0test.Auth0Constants;
 import com.google.gson.Gson;
 import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.logging.Logger;
+import modelClasses.Auth0Trans;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -41,14 +44,30 @@ public class OkHTTPClass {
                 .addHeader("Authorization", jwtKey)
                 .build();
 
-        Response response = staticClient.newCall(request).execute();
-        if (!response.isSuccessful()) {
-            throw new IOException("Unexpected code " + response);
-        }
+        Auth0Trans reply = new Auth0Trans();
 
-        Headers responseHeaders = response.headers();
-        for (int i = 0; i < responseHeaders.size(); i++) {
-            //  System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+        Response response = null;
+
+        try {
+           
+         response = staticClient.newCall(request).execute();
+
+            if (!response.isSuccessful()) {
+
+                log("error:" + response.body().string());
+
+                //  throw new IOException("Unexpected code " + response);
+                //CHECK FOR 401
+                if (response.code() == Auth0Constants.ERROR_CODE_401) {
+
+                   throw new IOException("ERROR_CODE_401 code " + response);
+                }
+            }
+
+        } catch (java.net.UnknownHostException ex) {
+            
+            throw new UnknownHostException("ERROR_CODE code " + response);
+
         }
 
         //   log(response.body().string());
