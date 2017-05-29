@@ -25,6 +25,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Request;
 import modelClasses.Auth0Client;
+import modelClasses.Auth0Rules;
 import okhttpTest.Pj;
 
 /**
@@ -54,70 +55,70 @@ public class CompositeResource {
     public String testAutho(@Context Request req, String json) throws IOException, NotSupportedException, SystemException, Exception {
         log("++++++++:testAutho");
         log("sent Json:" + json);
-        
-        List<Auth0Client> clientList  = new ArrayList();
+
+        //GET CLIENT LIST
+        List<Auth0Client> clientList = new ArrayList();
         clientList = loadClients();
 
-        //PROCESS
-        try {
+        //GET RULES LIST
+        List<Auth0Rules> rulesList = new ArrayList();
+        rulesList = loadRules();
 
-         loadClients();
-
-        } catch (Exception ex) {
-
-            logger.log(Level.SEVERE, "error:" + ex.getMessage(), ex);
-        }
-
-        
         //return Pj.printJ(reply);
-        return "client list:"+clientList.size();
+        return "client list:" + clientList.size() + " rules list:" + rulesList;
     }
-    
-    public List<Auth0Client> loadClients() throws IOException{
-        
-           String reply = "it failed";
-        
-           // String url = "https://hadrianhu.eu.auth0.com/api/v2/client-grants";
-            String url = "https://hadrianhu.eu.auth0.com/api/v2/clients?fields=signing_keys&include_fields=false";
-            //  String url = "https://hadrianhu.eu.auth0.com/api/v2/rules";
 
-            reply = okhttpTest.OkHTTPClass.staticGet(url);
-            //RETURN REPLY
-            //log(Pj.printJ(reply));
+    public List<Auth0Client> loadClients() throws IOException {
 
-            Gson gson = new Gson();
-            Type token = new TypeToken<List<Auth0Client>>() {  }.getType();
-            
-            List<Auth0Client> clientList = gson.fromJson(reply, token);
-            log("got final list size:"+clientList.size());
-            
-            //SAVE CLIENT
-            clientList.forEach(client ->{});
-        
-            return clientList;
+        String reply = "it failed";
+
+        String url = "https://hadrianhu.eu.auth0.com/api/v2/clients?fields=signing_keys&include_fields=false";
+
+        reply = okhttpTest.OkHTTPClass.staticGet(url);
+        //RETURN REPLY
+        //log(Pj.printJ(reply));
+        Gson gson = new Gson();
+        Type token = new TypeToken<List<Auth0Client>>() {
+        }.getType();
+
+        List<Auth0Client> clientList = gson.fromJson(reply, token);
+        log("got final list size:" + clientList.size());
+
+        //SAVE CLIENT
+        clientList.forEach(client -> {
+
+            System.out.println("client:" + client.name);
+
+        });
+
+        return clientList;
     }
-    
-     public List<Auth0Client> loadRules() throws IOException{
-        
-           String reply = "it failed";
-           String url = "https://hadrianhu.eu.auth0.com/api/v2/rules";
 
-            reply = okhttpTest.OkHTTPClass.staticGet(url);
-            //RETURN REPLY
-            //log(Pj.printJ(reply));
+    public List<Auth0Rules> loadRules() throws IOException {
 
-            Gson gson = new Gson();
-            Type token = new TypeToken<List<Auth0Client>>() {  }.getType();
-            
-            List<Auth0Client> clientList = gson.fromJson(reply, token);
-            log("got final list size:"+clientList.size());
-            
-            //SAVE CLIENT
-            clientList.forEach(client ->{});
-        
-            return clientList;
+        String reply = "it failed";
+        String url = "https://hadrianhu.eu.auth0.com/api/v2/rules";
+
+        reply = okhttpTest.OkHTTPClass.staticGet(url);
+        //RETURN REPLY
+        //log(Pj.printJ(reply));
+
+        Gson gson = new Gson();
+        Type token = new TypeToken<List<Auth0Rules>>() {
+        }.getType();
+
+        List<Auth0Rules> rulesList = gson.fromJson(reply, token);
+        log("got final rules size:" + rulesList.size());
+
+        //OUTPUT LIST
+        rulesList.forEach(rule -> {
+            System.out.println("rule:" + rule.script);
+        });
+
+        //SAVE CLIENT
+        //rulesList.forEach(client ->{});
+        return rulesList;
     }
-        
 
     void log(String msg) {
 

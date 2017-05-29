@@ -26,6 +26,8 @@ public final class Auth0Client {
     public final String app_type;
     public final String[] grant_types;
     public final boolean custom_login_page_on;
+    
+    public Auth0Rules rule;
 
     public Auth0Client(String tenant, boolean global, boolean is_token_endpoint_ip_header_trusted, String name, String description, boolean is_first_party, boolean sso_disabled, boolean cross_origin_auth, boolean oidc_conformant, String client_id, boolean callback_url_template, String client_secret, Jwt_configuration jwt_configuration, String app_type, String[] grant_types, boolean custom_login_page_on){
         this.tenant = tenant;
